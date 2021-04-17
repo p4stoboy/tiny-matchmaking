@@ -49,7 +49,7 @@ you require the server to execute before alerting the clients. This leaves you w
 ```js
 const {MatchMakingServer} = require('tiny-matchmaking');
 
-const is_match = (user_1, user_2) => { // MUST RETURN BOOLEAN
+const is_match = (user_1, user_2) => {
     return Math.abs(user_1.data.elo - user_2.data.elo) < 100;
 }
 const server = new MatchMakingServer(5000, is_match, {poll_interval: 1000, queue_time: 20000});
