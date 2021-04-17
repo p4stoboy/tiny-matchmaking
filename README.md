@@ -9,7 +9,7 @@ $ npm i tiny-matchmaking --s
 ```
 # Info
 This package exposes one MatchMakingServer and one MatchMakingClient class. 
-The server class encapsulates a WebSocket server, event emitter, and a pool of objects submitted by remote clients, it takes a callback function as an argument whose 
+The server class encapsulates a WebSocket server, event emitter, and a pool of objects submitted by remote clients, it takes a callback function as a constructor  argument whose 
 purpose is to determine whether any two objects in the pool should be considered matches (takes two objects as arguments and returns boolean).
 This function can consider whatever predicates you like as long as the relevant information is contained within the pool object.
 Each client object **must**:
