@@ -97,7 +97,6 @@ const client = new MatchMakingClient('ws://127.0.0.1:5000', client_match_result_
 //  ... any other properties you want
 // }
 
-// client machine 1
 const player_1 = {id: 1, elo: 150};
 client.match(player_1);
 ```
