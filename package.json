@@ -1,0 +1,54 @@
+{
+  "name": "tiny-matchmaking",
+  "version": "0.0.1",
+  "description": "Tiny matchmaking server.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\"",
+    "lint": "tslint -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p4stoboy/tiny-matchmaking.git"
+  },
+  "keywords": [
+    "matchmaking",
+    "match",
+    "maker",
+    "pvp",
+    "server",
+    "game",
+    "ELO",
+    "MMR"
+  ],
+  "author": "p4_",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/p4stoboy/tiny-matchmaking/issues"
+  },
+  "homepage": "https://github.com/p4stoboy/tiny-matchmaking#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "@types/ws": "^7.4.1",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "eslint": "^7.24.0",
+    "eslint-config-google": "^0.14.0",
+    "typescript": "^3.9.9"
+  },
+  "dependencies": {
+    "@types/uuid": "^8.3.0",
+    "uuid": "^8.3.2",
+    "ws": "^7.4.4"
+  }
+}
