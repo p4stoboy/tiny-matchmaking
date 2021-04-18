@@ -1,10 +1,9 @@
 import WebSocket from 'ws';
 import https from 'https';
 
-export type PoolItem = {
+export type PoolItem<T> = T & {
     socket: WebSocket,
-    time_joined: number,
-    data: any
+    time_joined: number
 }
 
 export type ServerOptions = {

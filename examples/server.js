@@ -1,15 +1,30 @@
+const { MatchMakingServer } = require("../dist/server");
+
 // example function that determines whether two objects should be considered a match.
 // function is always called with two parameters, both are objects from the pool.
 // must return boolean.
-// each object looks like:
+// each client object looks like:
 // {
 //  socket: WebSocket,
 //  time_joined: number, (time when queue was joined)
-//  data: { ...OBJECT SUBMITTED TO POOL BY CLIENT }
+//  ...FIELDS SUBMITTED TO POOL BY CLIENT (eg: ...{id: 89734, elo: 300})
 // }
-const is_match = (user_1, user_2) => { // MUST RETURN BOOLEAN
-    return Math.abs(user_1.data.elo - user_2.data.elo) < 100;
+const is_match_func = (client_1, client_2) => { // MUST RETURN BOOLEAN
+    return Math.abs(client_1.elo - client_2.elo) < 100;
 
+}
+
+// optional results function
+// if not passed server response to client will be in form:
+// {
+//  client: <object sent by client>,
+//  opponent: <object client was matched with>
+// }
+// otherwise response will be whatever this function returns
+const results_func = (client_1, client_2) => {
+    return client_1.power > client_2.power
+        ? {winner: client_1.id, loser: client_2.id}
+        : {winner: client_2.id, loser: client_1.id};
 }
 
 // instantiate the server, (port, match_function, options (optional) {
@@ -18,21 +33,4 @@ const is_match = (user_1, user_2) => { // MUST RETURN BOOLEAN
 //  allowed_clients: string[] (ip whitelist, not considered if nothing is passed in)
 //  disallowed_clients: string[] (ip blacklist, not considered if nothing is passed in)
 // }
-const server = new MatchMakingServer(5000, is_match, {poll_interval: 1000, queue_time: 20000});
-
-// handle logic for when match is found
-server.emitter.on('match', (m1, m2) => {
-    // do battle routine or pass this to another function
-    // eg. const results = do_battle(m1, m2);
-    const results = {winner: m1.data.id, loser: m2.data.id};
-    console.log(`SERVER: Match over:  ${JSON.stringify(results)}`);
-
-    // send whatever info you need to back to clients.
-    // results will be passed in to client results handler function on each client
-    m1.socket.send(JSON.stringify({id: m1.data.id, results: {...results}}));
-    m2.socket.send(JSON.stringify({id: m2.data.id, results: {...results}}));
-
-    // make sure you close the connections
-    m1.socket.close();
-    m2.socket.close();
-});
+const server = new MatchMakingServer(5000, is_match_func, null, {poll_interval: 1000, queue_time: 20000});

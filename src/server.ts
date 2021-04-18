@@ -1,23 +1,24 @@
 import {Server as WSServer} from 'ws';
-import { PoolItem, ServerOptions } from './types';
-import { EventEmitter } from 'events';
-
+import {PoolItem, ServerOptions} from './types';
 
 export class MatchMakingServer {
     wss: WSServer;
+    port: number;
     allowed_clients: string[] | null;
     disallowed_clients: string[] | null;
     queue_time: number;
     poll_interval: number;
-    pool: Map<string, PoolItem> = new Map<string, PoolItem>();
-    is_match: (p1: PoolItem, p2: PoolItem) => boolean;
-    emitter: EventEmitter = new EventEmitter();
+    pool: Map<string | number, PoolItem<any>> = new Map<string | number, PoolItem<any>>();
+    is_match: (p1: PoolItem<any>, p2: PoolItem<any>) => boolean;
+    results_func?: ((p1: PoolItem<any>, p2: PoolItem<any>) => any) | null;
 
     constructor(
         _port: number,
-        _is_match: (p1: PoolItem, p2: PoolItem) => boolean,
+        _is_match: (p1: PoolItem<any>, p2: PoolItem<any>) => boolean,
+        _results_func?: ((p1: PoolItem<any>, p2: PoolItem<any>) => any) | null,
         _options?: ServerOptions
     ) {
+        this.port = _port;
         this.allowed_clients = _options?.allowed_clients ? _options.allowed_clients : null;
         this.disallowed_clients = _options?.disallowed_clients ? _options.disallowed_clients : null;
         this.queue_time = _options?.queue_time ? _options.queue_time : 20000;
@@ -27,6 +28,7 @@ export class MatchMakingServer {
                 ? {port: _port}
                 : {server: _options.https_server, port: _port});
         this.is_match = _is_match;
+        this.results_func = _results_func ? _results_func : null;
         this.start();
         setInterval(() => this.match_make(), this.poll_interval);
     }
@@ -50,19 +52,20 @@ export class MatchMakingServer {
 
             //receive player info
             ws.on('message', message => {
-                const new_item: PoolItem = {
+                const new_item: PoolItem<any> = {
                     socket: ws,
                     time_joined: Date.now(),
-                    data: JSON.parse(message.toString())
+                    ...JSON.parse(message.toString())
                 };
                 // add player to pool if they are not already in pool
-                if (!this.pool.has(new_item.data.id)) {
-                    this.pool.set(new_item.data.id, new_item);
+                if (!this.pool.has(new_item.id)) {
+                    this.pool.set(new_item.id, new_item);
                 } else {
                     ws.close();
                 }
             });
         });
+        console.log(`MatchMaking Server running on port ${this.port}`);
     }
 
     match_make() {
@@ -71,17 +74,30 @@ export class MatchMakingServer {
         }
         for (const [A, p1] of this.pool) {
             for (const [B, p2] of this.pool) {
-                if (p1.data.id !== p2.data.id && this.is_match(p1, p2)) {
+                if (p1.id !== p2.id && this.is_match(p1, p2)) {
                     const a = this.pool.get(A);
                     const b = this.pool.get(B);
                     if (a && b) {
-                        this.emitter.emit('match', {...a}, {...b});
+                        console.log(`MATCH FOUND: ${a.id} vs ${b.id}`);
+                        if (!this.results_func) {
+                            const a_res = remove_socket(a);
+                            const b_res = remove_socket(b);
+                            a.socket.send(JSON.stringify({client: {...a_res}, opponent: {...b_res}}));
+                            b.socket.send(JSON.stringify({client: {...b_res}, opponent: {...a_res}}));
+                        } else {
+                            const res = this.results_func(a, b);
+                            a.socket.send(JSON.stringify(res));
+                            b.socket.send(JSON.stringify(res));
+                        }
+                        a.socket.close();
+                        b.socket.close();
                         this.pool.delete(A);
                         this.pool.delete(B);
                     }
                 } else {
                     const b = this.pool.get(B);
                     if (b && Date.now() - b.time_joined > this.queue_time) {
+                        console.log(`${b.id} timed out of queue.`);
                         b.socket.close();
                         this.pool.delete(B);
                     }
@@ -89,4 +105,9 @@ export class MatchMakingServer {
             }
         }
     }
+}
+
+const remove_socket = (x: any): any => {
+    const {socket, ...a} = x;
+    return a;
 }
