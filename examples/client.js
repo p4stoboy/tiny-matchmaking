@@ -22,17 +22,16 @@ const client = new MatchMakingClient('ws://127.0.0.1:5000', client_match_result_
 //  ... any other properties you want
 // }
 
-// client machine 1
-const player_1 = {id: 1, elo: 150, power: 700};
+const player_1 = {id: 1, elo: 150, power: 700, name: "John"};
 client.match(player_1);
-// 2
-const player_2 = {id: 2, elo: 320, power: 900};
+
+const player_2 = {id: 2, elo: 320, power: 900, name: "Sergio"};
 client.match(player_2);
-// 3
-const player_3 = {id: 3, elo: 380, power: 300};
+
+const player_3 = {id: 3, elo: 380, power: 300, name: "Brooklyn"};
 client.match(player_3);
-// 4
-const player_4 = {id: 4, elo: 160, power: 450};
+
+const player_4 = {id: 4, elo: 160, power: 450, name: "Miguel"};
 client.match(player_4);
 
 // let i = 5;
