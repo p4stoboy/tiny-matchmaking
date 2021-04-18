@@ -53,8 +53,8 @@ Example function that determines whether two objects should be considered a matc
 Function is always called with two parameters, both are client objects from the pool.
 Must return boolean.
 ```js
-const is_match = (user_1, user_2) => { // MUST RETURN BOOLEAN
-    return Math.abs(user_1.data.elo - user_2.data.elo) < 100;
+const is_match = (user_1, user_2) => {
+    return Math.abs(user_1.elo - user_2.elo) < 100;
 }
 ```
 Example function for parsing results if the default response doesn't suit your use case.
