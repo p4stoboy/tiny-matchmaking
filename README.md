@@ -156,4 +156,4 @@ client.match(player_3);
 const player_4 = {id: 4, elo: 160, power: 450, name: "Miguel"};
 client.match(player_4);
 ```
-![example scripts](https://media.giphy.com/media/J9mVvDfIeJiZY0vkFW/giphy.gif)
+![example scripts](https://i.imgur.com/n1lVWGU.png)
